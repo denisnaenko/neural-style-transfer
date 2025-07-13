@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Ghibli Style Transfer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Comfortaa', Arial, sans-serif;
+            background: linear-gradient(120deg, #2CB1B3 0%, #EAD7B7 100%);
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 40px;
+            max-width: 950px;
+            margin: 60px auto;
+            background: #EAD7B7;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px #A9A89D55, 0 1.5px 8px #23201e22;
+            padding: 40px 32px;
+        }
+
+        .upload-block {
+            flex: 1;
+            background: #FBC3A2;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px #A9A89D33, 0 1.5px 6px #23201e11;
+            padding: 32px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .result-block {
+            flex: 1;
+            background: #B6C39B;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px #A9A89D33, 0 1.5px 6px #23201e11;
+            padding: 32px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 320px;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #23201E;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .upload-area {
+            border: 2px dashed #3CA7A6;
+            border-radius: 12px;
+            background: #fff;
+            width: 320px;
+            height: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin: 24px 0 16px 0;
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+            text-align: center;
+            box-shadow: 0 2px 8px #23201e18;
+        }
+
+        .upload-area.dragover {
+            border-color: #2CB1B3;
+            background: #E97C74;
+            box-shadow: 0 4px 16px #e97c7488, 0 2px 8px #23201e22;
+        }
+
+        .upload-area svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 18px;
+            fill: #3CA7A6;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .upload-area span {
+            color: #23201E;
+            font-size: 20px;
+            opacity: 0.95;
+            display: block;
+            width: 100%;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        button {
+            background: #2CB1B3;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 32px;
+            font-size: 18px;
+            font-family: 'Comfortaa', Arial, sans-serif;
+            cursor: pointer;
+            box-shadow: 0 2px 6px #A9A89D33, 0 1.5px 4px #23201e22;
+            transition: background 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        button:hover {
+            background: #E97C74;
+            box-shadow: 0 4px 12px #e97c7488, 0 2px 8px #23201e33;
+        }
+
+        .ghibli-hint {
+            color: #6B4A3B;
+            font-size: 17px;
+            margin-top: 24px;
+            text-align: center;
+            opacity: 0.9;
+        }
+
+        .result-placeholder {
+            color: #23201E;
+            font-size: 20px;
+            margin-top: 60px;
+            text-align: center;
+            opacity: 0.8;
+        }
+
+        .github-fab {
+            position: fixed;
+            right: 32px;
+            bottom: 32px;
+            z-index: 100;
+            background: #23201E;
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px #23201E33;
+            transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+            cursor: pointer;
+            opacity: 0.85;
+        }
+
+        .github-fab:hover {
+            background: #3CA7A6;
+            box-shadow: 0 4px 16px #23201E55;
+            opacity: 1;
+            transform: scale(1.08);
+        }
+
+        .github-fab svg {
+            width: 32px;
+            height: 32px;
+            fill: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <div class="upload-block">
+            <h2>Загрузите изображение</h2>
+            <form id="uploadForm" action="/upload_image/" method="post" enctype="multipart/form-data">
+                <label class="upload-area" id="uploadArea">
+                    <svg viewBox="0 0 64 64">
+                        <path d="M48 40v6a2 2 0 0 1-2 2H18a2 2 0 0 1-2-2v-6H8l24-24 24 24z" />
+                        <path d="M32 12v28" stroke="#4db6ac" stroke-width="3" stroke-linecap="round" fill="none" />
+                    </svg>
+                    <span id="uploadText">кликните или перетащите файл</span>
+                    <input type="file" name="file" id="fileInput" accept="image/*" required>
+                </label>
+                <button type="submit">Отправить</button>
+            </form>
+            <div class="ghibli-hint">
+                <p>Вдохновлено студией Ghibli 🌱<br>Слева — ваше фото, справа — результат в стиле Ghibli!</p>
+            </div>
+        </div>
+        <div class="result-block">
+            <div class="result-placeholder">
+                Здесь появится результат генерации<br>в стилистике студии Ghibli
+            </div>
+        </div>
+    </div>
+    <a class="github-fab" href="https://github.com/denisnaenko/neural-style-transfer" target="_blank"
+        title="GitHub проекта">
+        <svg viewBox="0 0 24 24">
+            <path
+                d="M12 0.297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.387 0.6 0.113 0.82-0.258 0.82-0.577 0-0.285-0.011-1.04-0.017-2.04-3.338 0.726-4.042-1.61-4.042-1.61-0.546-1.387-1.333-1.756-1.333-1.756-1.089-0.745 0.083-0.729 0.083-0.729 1.205 0.084 1.84 1.237 1.84 1.237 1.07 1.834 2.809 1.304 3.495 0.997 0.108-0.775 0.418-1.305 0.762-1.605-2.665-0.305-5.466-1.334-5.466-5.931 0-1.31 0.469-2.381 1.236-3.221-0.124-0.303-0.535-1.523 0.117-3.176 0 0 1.008-0.322 3.301 1.23 0.957-0.266 1.983-0.399 3.003-0.404 1.02 0.005 2.047 0.138 3.006 0.404 2.291-1.553 3.297-1.23 3.297-1.23 0.653 1.653 0.242 2.873 0.119 3.176 0.77 0.84 1.235 1.911 1.235 3.221 0 4.609-2.803 5.624-5.475 5.921 0.43 0.372 0.823 1.102 0.823 2.222 0 1.606-0.015 2.898-0.015 3.293 0 0.322 0.216 0.694 0.825 0.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+        </svg>
+    </a>
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadText = document.getElementById('uploadText');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                uploadText.textContent = e.dataTransfer.files[0].name;
+            }
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (fileInput.files.length) {
+                uploadText.textContent = fileInput.files[0].name;
+            } else {
+                uploadText.textContent = 'Кликните или перетащите файл';
+            }
+        });
+    </script>
+</body>
+
+</html>
