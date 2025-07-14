@@ -46,7 +46,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 320px;
+            justify-content: center;
+            min-height: 420px;
         }
 
         h2 {
@@ -187,11 +188,12 @@
                 </label>
                 <button type="submit">Отправить</button>
             </form>
+            <div id="preview-container" style="margin-top:20px;"></div>
             <div class="ghibli-hint">
                 <p>Вдохновлено студией Ghibli 🌱<br>Слева — ваше фото, справа — результат в стиле Ghibli!</p>
             </div>
         </div>
-        <div class="result-block">
+        <div class="result-block" id="result-block">
             <div class="result-placeholder">
                 Здесь появится результат генерации<br>в стилистике студии Ghibli
             </div>
@@ -208,6 +210,9 @@
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
         const uploadText = document.getElementById('uploadText');
+        const uploadForm = document.getElementById('uploadForm');
+        const previewContainer = document.getElementById('preview-container');
+        const resultBlock = document.getElementById('result-block');
 
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -232,6 +237,41 @@
                 uploadText.textContent = 'Кликните или перетащите файл';
             }
         });
+
+        uploadForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const formData = new FormData(uploadForm);
+            const response = await fetch('/upload_image/', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            if (response.ok && result.url) {
+                previewContainer.innerHTML = `<img src="${result.url}" alt="Загруженное изображение" style="max-width:300px;max-height:200px;border-radius:10px;box-shadow:0 2px 8px #23201e22;">`;
+                await runStyleTransfer();
+            } else {
+                previewContainer.innerHTML = `<span style="color:red;">Ошибка: ${result.detail || 'Не удалось загрузить файл.'}</span>`;
+            }
+        });
+
+        async function runStyleTransfer() {
+            resultBlock.innerHTML = '<div class="result-placeholder">Генерация...</div>';
+            const response = await fetch('/transfer/', { method: 'POST' });
+            const result = await response.json();
+            if (response.ok && result.result && result.plot) {
+                // Добавляем уникальный параметр времени, чтобы сбросить кэш браузера
+                const resultUrl = `${result.result}?t=${Date.now()}`;
+                const plotUrl = `${result.plot}?t=${Date.now()}`;
+                resultBlock.innerHTML = `
+                    <img src="${resultUrl}" alt="Результат" style="max-width:90%;max-height:420px;display:block;margin:0 auto 18px auto;border-radius:16px;box-shadow:0 2px 8px #23201e22;">
+                    <div style="margin-top:10px; text-align:center; width:100%;">
+                        <a href="${plotUrl}" target="_blank" id="show-plot-link" style="font-size:16px; color:#2CB1B3; text-decoration:underline; cursor:pointer;">Показать график потерь</a>
+                    </div>
+                `;
+            } else {
+                resultBlock.innerHTML = `<span style="color:red;">Ошибка генерации: ${result.detail || 'Не удалось получить результат.'}</span>`;
+            }
+        }
     </script>
 </body>
 
