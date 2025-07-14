@@ -64,9 +64,9 @@ def get_uploaded_file(filename: str):
 @app.post("/transfer/")
 async def transfer_style():
     try:
-        result = process_style_transfer(
+        _ = process_style_transfer(
             str(CONTENT_PATH),
-            str(STYLE_PATH),
+            str(Path(__file__).parent / "styles"),
             str(RESULT_PATH),
             str(PLOT_PATH),
             resize_size=(512, 512),

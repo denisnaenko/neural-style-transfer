@@ -21,11 +21,13 @@ class ContentLoss(nn.Module):
 
 
 class StyleLoss(nn.Module):
-    def __init__(self, target_feature):
+    def __init__(self, target_features):
         super(StyleLoss, self).__init__()
-        self.target = gram_matrix(target_feature).detach()
+        # target_features — список feature-тензоров
+        self.targets = [gram_matrix(f).detach() for f in target_features]
 
     def forward(self, input):
         G = gram_matrix(input)
-        self.loss = F.mse_loss(G, self.target)
+        # Среднее MSE по всем style-референсам
+        self.loss = sum(F.mse_loss(G, t) for t in self.targets) / len(self.targets)
         return input

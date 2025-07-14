@@ -10,7 +10,7 @@ def get_style_model_and_losses(
     cnn,
     normalization_mean,
     normalization_std,
-    style_img,
+    style_imgs,
     content_img,
     content_layers,
     style_layers,
@@ -42,8 +42,8 @@ def get_style_model_and_losses(
             model.add_module(f"content_loss_{i}", content_loss)
             content_losses.append(content_loss)
         if name in style_layers:
-            target_feature = model(style_img).detach()
-            style_loss = StyleLoss(target_feature)
+            target_features = [model(style_img).detach() for style_img in style_imgs]
+            style_loss = StyleLoss(target_features)
             model.add_module(f"style_loss_{i}", style_loss)
             style_losses.append(style_loss)
     for j in range(len(model) - 1, -1, -1):
@@ -63,7 +63,7 @@ def run_style_transfer(
     normalization_mean,
     normalization_std,
     content_img,
-    style_img,
+    style_imgs,
     input_img,
     content_layers,
     style_layers,
@@ -76,7 +76,7 @@ def run_style_transfer(
         cnn,
         normalization_mean,
         normalization_std,
-        style_img,
+        style_imgs,
         content_img,
         content_layers,
         style_layers,
@@ -116,7 +116,6 @@ def run_style_transfer(
         optimizer.step(closure)
     with torch.no_grad():
         input_img.clamp_(0, 1)
-    # Построение графика
     if plot_path:
         plt.figure()
         plt.plot(style_history, label="Style Loss")

@@ -1,4 +1,6 @@
 import torch
+import os
+
 from torchvision.transforms import ToPILImage
 
 from .model import get_vgg_model
@@ -8,14 +10,23 @@ from .utils import image_loader
 
 def process_style_transfer(
     content_path: str,
-    style_path: str,
+    styles_dir: str,
     result_path: str,
     plot_path: str,
     resize_size=(512, 512),
 ):
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     content_img = image_loader(content_path, device, size=resize_size)
-    style_img = image_loader(style_path, device, size=resize_size)
+
+    style_imgs = []
+    for fname in os.listdir(styles_dir):
+        if fname.lower().endswith((".jpg", ".jpeg", ".png")):
+            style_imgs.append(
+                image_loader(os.path.join(styles_dir, fname), device, size=resize_size)
+            )
+    if not style_imgs:
+        raise RuntimeError("No style reference images found in styles directory!")
     input_img = content_img.clone()
 
     cnn = get_vgg_model().to(device)
@@ -29,11 +40,11 @@ def process_style_transfer(
         cnn_normalization_mean,
         cnn_normalization_std,
         content_img,
-        style_img,
+        style_imgs,
         input_img,
         content_layers,
         style_layers,
-        num_steps=300,
+        num_steps=500,
         style_weight=int(1e6),
         content_weight=1,
         plot_path=plot_path,
