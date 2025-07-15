@@ -68,8 +68,8 @@ def run_style_transfer(
     content_layers,
     style_layers,
     num_steps=300,
-    style_weight=1000000,
-    content_weight=1,
+    style_weight=1e6,
+    content_weight=1.0,
     plot_path=None,
 ):
     model, style_losses, content_losses = get_style_model_and_losses(
