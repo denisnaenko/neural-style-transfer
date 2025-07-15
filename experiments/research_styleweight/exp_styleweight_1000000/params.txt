@@ -1,0 +1,11 @@
+resize_size=(512, 512)
+style_weight=1000000.0
+content_weight=1
+num_steps=300
+styles=['style10.jpg', 'style11.jpg', 'style13.jpg', 'style6.jpg', 'style3.jpg', 'style9.jpg', 'style7.jpg', 'style1.jpg', 'style8.jpg', 'style2.jpg', 'style5.jpg', 'style12.jpg', 'style4.jpg']
+note=style_weight=1000000.0
+elapsed=22.52
+final_style_loss=330.20147705078125
+final_content_loss=3.891801357269287
+min_style_loss=330.20147705078125
+min_content_loss=0.0
